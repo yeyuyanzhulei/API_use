@@ -9,14 +9,30 @@ st.title("智能对话助手 💬")
 # overflow-anchor: none; 是解决 Chrome 滚动锁死的关键
 st.markdown("""
     <style>
-        /* 1. 禁用 Chrome 的滚动锚定，防止它在内容增加时自动锁住滚动条 */
+        /* 1. 强制主容器允许垂直滚动，绝对不要隐藏滚动条 */
         [data-testid="stAppViewContainer"] {
-            overflow-anchor: none;
+            overflow-y: auto !important; /* 强制开启滚动 */
+            overflow-x: hidden !important;
+            height: 100vh; /* 确保占满视窗高度 */
         }
         
-        /* 2. 确保最后一条消息下方有一定的留白，避免被输入框遮挡太严实 */
+        /* 2. 自定义滚动条样式 (可选，为了让它更明显) */
+        ::-webkit-scrollbar {
+            width: 10px;
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888; 
+            border-radius: 5px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555; 
+        }
+
+        /* 3. 给最后一条消息底部增加大量留白 */
+        /* 这样 scrollIntoView 时，文字会被推到输入框上方，而不是被输入框盖住 */
         .stChatMessage:last-child {
-            padding-bottom: 50px;
+            padding-bottom: 150px; 
         }
     </style>
 """, unsafe_allow_html=True)
@@ -157,5 +173,6 @@ if prompt := st.chat_input("有什么可以帮你的？"):
             
             
             
+
 
 
