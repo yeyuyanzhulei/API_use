@@ -9,10 +9,19 @@ st.title("智能对话助手 💬")
 with st.sidebar:
     st.markdown("### 参数设置")
     # 这里的key默认为空，你可以填入你的key
-    api_key = st.text_input("OpenAI API Key", type="password")
+    if "OPENAI_API_KEY" in st.secrets:
+        api_key = st.secrets["OPENAI_API_KEY"]
+        st.success("✅ 已检测到云端配置的 API Key")
+    else:
+        api_key = st.text_input("OpenAI API Key", type="password")
+    
     # 如果你使用官方 API，base_url 不需要改。
     # 如果你使用中转服务 (如 OhMyGPT, DeepSeek 等)，请修改这里。
-    base_url = st.text_input("Base URL (可选)", value="https://api.deepseek.com")
+    if "BASE_URL" in st.secrets:
+        base_url = st.secrets["BASE_URL"]
+        st.success("✅ 已检测到云端配置的 Base URL")
+    else:
+        base_url = st.text_input("Base URL (可选)", value="https://api.deepseek.com")
     
     st.markdown("---")
     # 增加一个清空历史的按钮，方便测试
