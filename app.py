@@ -5,6 +5,22 @@ from openai import OpenAI
 st.set_page_config(page_title="智能对话助手", page_icon="💬")
 st.title("智能对话助手 💬")
 
+# css样式优化
+st.markdown(
+    """
+    <style>
+        /* 1.给主内容区域增加底部六百，防止固定的输入框遮挡*/
+        .block-container{
+            padding-bottom: 120px;
+        }
+        /* 2.强制开启平滑滚动 */
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
+    """
+)
+
 # 2. 侧边栏配置
 with st.sidebar:
     st.markdown("### 参数设置")
@@ -103,4 +119,5 @@ if prompt := st.chat_input("有什么可以帮你的？"):
             
 
             
+
 
