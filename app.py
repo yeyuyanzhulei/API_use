@@ -1,8 +1,5 @@
 import streamlit as st
 from openai import OpenAI
-from streamlit.components.v1 import components
-import time
-
 
 # 1. 页面设置
 st.set_page_config(page_title="智能对话助手", page_icon="💬", layout="wide")
@@ -57,59 +54,7 @@ for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.write(msg["content"])
    
-# --- 6. [升级] 定义 JavaScript 滚动函数 ---
-def scroll_to_bottom():
-    """
-    注入一段 JS 代码，强制页面滚动到底部。
-    兼容性优化版 (3.0 - 终极版):
-    1. 暴力遍历：不再猜测谁是容器，遍历所有可能的滚动容器。
-    2. 锚点定位：找到页面最后一个元素，使用 scrollIntoView 强制浏览器对齐。
-    3. 多重触发：防止网络卡顿或渲染延迟，执行多次滚动指令。
-    """
-    js = """
-    <script>
-        function scrollDown() {
-            // 策略 A: 针对 Streamlit 已知的容器结构进行滚动
-            const selectors = [
-                '[data-testid="stAppViewContainer"]', // 现代 Streamlit
-                '.main',                              // 旧版/某些移动端
-                'section.main',
-                'div[class*="stAppViewContainer"]'    // 模糊匹配
-            ];
-            
-            // 尝试滚动所有匹配的容器
-            selectors.forEach(selector => {
-                const elements = window.parent.document.querySelectorAll(selector);
-                elements.forEach(el => {
-                    try {
-                        el.scrollTop = el.scrollHeight; // 滚动到底部
-                    } catch(e) {} // 忽略跨域或权限错误
-                });
-            });
-
-            // 策略 B: 视口级滚动 (针对 Safari/Mobile)
-            try {
-                window.parent.window.scrollTo(0, window.parent.document.body.scrollHeight);
-            } catch(e) {}
-
-            // 策略 C: 终极方案 - 找到页面最后一个元素并让它“进入视野”
-            // 这通常能解决最顽固的浏览器不滚动问题
-            try {
-                const allElements = window.parent.document.body.getElementsByTagName("*");
-                if (allElements.length > 0) {
-                    const lastElement = allElements[allElements.length - 1];
-                    lastElement.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" });
-                }
-            } catch(e) {}
-        }
-        
-        // 执行多次以对抗渲染延迟 (100ms, 300ms, 500ms)
-        setTimeout(scrollDown, 100);
-        setTimeout(scrollDown, 300);
-        setTimeout(scrollDown, 500);
-    </script>
-    """
-    components.html(js, height=0, width=0)
+   
         
 # 6. 处理输入与调用API
 
@@ -154,8 +99,6 @@ if prompt := st.chat_input("有什么可以帮你的？"):
                 
             # 2. 把 AI 回复存入历史
             st.session_state.messages.append({"role":"assistant", "content": full_response})
-            
-            scroll_to_bottom()  # 调用滚动函数，滚动到底部
         except Exception as e:
             message_placeholder.markdown(f"出错了: {e}")
             
