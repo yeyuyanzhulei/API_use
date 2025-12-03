@@ -14,29 +14,6 @@ st.markdown("""
             overflow-x: hidden !important;
             height: 100vh; /* 确保占满视窗高度 */
         }
-        /* 2. 侧边栏样式优化：确保它在自己的容器里也能滚动（如果有需要） */
-        [data-testid="stSidebar"] {
-            height: 100vh;
-            overflow-y: auto;
-        }
-        /* 2. 自定义滚动条样式 (可选，为了让它更明显) */
-        ::-webkit-scrollbar {
-            width: 10px;
-            background: transparent;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #888; 
-            border-radius: 5px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #555; 
-        }
-
-        /* 3. 给最后一条消息底部增加大量留白 */
-        /* 这样 scrollIntoView 时，文字会被推到输入框上方，而不是被输入框盖住 */
-        .stChatMessage:last-child {
-            padding-bottom: 150px; 
-        }
     </style>
 """, unsafe_allow_html=True)
 
@@ -138,6 +115,7 @@ if prompt := st.chat_input("有什么可以帮你的？"):
             
             
             
+
 
 
 
