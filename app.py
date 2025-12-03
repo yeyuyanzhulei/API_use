@@ -1,116 +1,120 @@
 import streamlit as st
-import streamlit.components.v1 as components # 引入组件库用于注入 JS
 from openai import OpenAI
-import time
 
-# --- 1. 页面配置 ---
-st.set_page_config(page_title="流式对话助手", page_icon="⚡", layout="centered")
-st.title("⚡ Mission 6: 滚动修复版 (通用兼容)") 
+# 1. 页面设置
+st.set_page_config(page_title="智能对话助手", page_icon="💬", layout="wide")
+st.title("智能对话助手 💬")
 
-# --- 2. 侧边栏配置 ---
+# css样式优化
+st.markdown(
+    """
+    <style>
+        /* 1.给主内容区域增加底部留白，防止固定的输入框遮挡*/
+        .block-container{
+            padding-bottom: 120px;
+        }
+        /* 2.强制开启平滑滚动 */
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
+    """, unsafe_allow_html=True
+)
+
+# 2. 侧边栏配置
 with st.sidebar:
-    st.markdown("### ⚙️ 参数设置")
-    
+    st.markdown("### 参数设置")
+    # 这里的key默认为空，你可以填入你的key
     if "OPENAI_API_KEY" in st.secrets:
         api_key = st.secrets["OPENAI_API_KEY"]
-        st.success("✅ 已检测到云端 Key")
+        st.success("✅ 已检测到云端配置的 API Key")
     else:
-        api_key = st.text_input("输入 OpenAI API Key", type="password")
-
-    if "OPENAI_BASE_URL" in st.secrets:
-        base_url = st.secrets["OPENAI_BASE_URL"]
-        st.info(f"🔗 使用配置的 Base URL")
+        api_key = st.text_input("OpenAI API Key", type="password")
+    
+    # 如果你使用官方 API，base_url 不需要改。
+    # 如果你使用中转服务 (如 OhMyGPT, DeepSeek 等)，请修改这里。
+    if "BASE_URL" in st.secrets:
+        base_url = st.secrets["BASE_URL"]
+        st.success("✅ 已检测到云端配置的 Base URL")
     else:
-        base_url = st.text_input("Base URL (可选)", value="https://api.openai.com/v1")
+        base_url = st.text_input("Base URL (可选)", value="https://api.deepseek.com")
     
     st.markdown("---")
-    if st.button("🗑️ 清空对话历史"):
+    # 增加一个清空历史的按钮，方便测试
+    if st.button("清空历史记录"):
         st.session_state.messages = []
         st.rerun()
-
-# --- 3. 初始化 OpenAI 客户端 ---
+        
+# 3. 初始化 OpenAI 客户端
+# 只有当用户输入了 Key 才初始化，否则后续会报错
 if api_key:
     client = OpenAI(api_key=api_key, base_url=base_url)
 else:
-    st.warning("👈 请在侧边栏输入 API Key 才能开始。")
+    # 如果没填Key，给个提示并停止运行后续代码
+    st.warning("API 错误！！！")
     st.stop()
-
-# --- 4. 初始化 Session State ---
+    
+# 4. 初始化
 if "messages" not in st.session_state:
+    # 可以在这里加一个系统提示词，定义 AI 的人设
     st.session_state.messages = [
-        {"role": "system", "content": "你是一个乐于助人的 AI 助手。"}
+        {"role": "system", "content":"你是一个智能AI助手"}
     ]
 
-# --- 5. 渲染历史消息 ---
+# 5. 渲染历史消息
 for msg in st.session_state.messages:
+    # 假如是 system 消息，我们通常不在界面显示
     if msg["role"] == "system":
         continue
+    
     with st.chat_message(msg["role"]):
         st.write(msg["content"])
+        
+# 6. 处理输入与调用API
 
-# --- 6. [升级] 定义 JavaScript 滚动函数 ---
-def scroll_to_bottom():
-    """
-    注入一段 JS 代码，强制页面滚动到底部。
-    兼容性优化版：
-    1. 使用 data-testid 定位 Streamlit 主容器 (兼容新版 Streamlit)
-    2. 使用 setTimeout 延迟执行，等待 DOM 渲染完毕
-    """
-    js = """
-    <script>
-        function scrollDown() {
-            // 1. 获取 Streamlit 的主滚动容器 (这是目前最通用的选择器)
-            var container = window.parent.document.querySelector('[data-testid="stAppViewContainer"]');
-            
-            if (container) {
-                container.scrollTop = container.scrollHeight;
-            } else {
-                // 2. 备用方案：尝试滚动 body (针对部分浏览器或旧版)
-                var body = window.parent.document.querySelector(".main");
-                if (body) {
-                    body.scrollTop = body.scrollHeight;
-                } else {
-                    // 3. 最后的保底：滚动当前窗口
-                    window.scrollTo(0, document.body.scrollHeight);
-                }
-            }
-        }
-        // 延迟 150ms 执行，确保页面元素已经渲染并占据了高度
-        setTimeout(scrollDown, 150);
-    </script>
-    """
-    components.html(js, height=0, width=0)
-
-# --- 7. 处理输入与流式 API 调用 ---
-if prompt := st.chat_input("说点什么..."):
-    # A. 用户部分
-    st.session_state.messages.append({"role": "user", "content": prompt})
+if prompt := st.chat_input("有什么可以帮你的？"):
+    # A. 用户发消息
+    # 1. 存入历史
+    st.session_state.messages.append({"role":"user", "content": prompt})
+    # 2.界面显示
     with st.chat_message("user"):
         st.write(prompt)
-
-    # B. AI 部分
+        
+    # B. AI 回复
+    # 1. 界面显示一个“思考中”的状态
     with st.chat_message("assistant"):
+        message_placeholder = st.empty()
+        full_response = ""
+        
         try:
-            stream = client.chat.completions.create(
-                model="gpt-3.5-turbo",
+            # 关键步骤：调用 API
+            # 注意：我们将st.session_state.messages（整个历史）传给了API
+            # 这就是“记忆”的来源！
+            response = client.chat.completions.create(
+                model="deepseek-chat",
                 messages=st.session_state.messages,
-                stream=True,
                 temperature=0.7,
+                stream=True,
             )
-            
-            # 使用 st.write_stream 实现流式输出
-            def stream_data():
-                for chunk in stream:
-                    if chunk.choices[0].delta.content is not None:
-                        yield chunk.choices[0].delta.content
-
-            full_response = st.write_stream(stream_data)
-            
-            # 将完整的回复存入历史
-            st.session_state.messages.append({"role": "assistant", "content": full_response})
-
-            # [关键] 强制执行一次滚动
-            scroll_to_bottom()
-
+            # ai_content = response.choices[0].message.content
+            # message_placeholder.markdown(ai_content)
+            # 循环处理数据流
+            for chunck in response:
+                # 检查这个数据块里有没有内容
+                if chunck.choices[0].delta.content is not None:
+                    # 获取这一小块文本
+                    content = chunck.choices[0].delta.content
+                    # 拼接到总回复中
+                    full_response += content
+                    # 实时更新界面显示,加一个光标模拟打字感
+                    message_placeholder.markdown(full_response + "▌")
+            # 最后把完整回复显示出来，去掉光标
+            message_placeholder.markdown(full_response)
+                
+            # 2. 把 AI 回复存入历史
+            st.session_state.messages.append({"role":"assistant", "content": full_response})
         except Exception as e:
-            st.error(f"发生错误: {e}")
+            message_placeholder.markdown(f"出错了: {e}")
+            
+            
+            
