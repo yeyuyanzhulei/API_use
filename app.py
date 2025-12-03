@@ -1,6 +1,6 @@
 import streamlit as st
 from openai import OpenAI
-
+import streamlit.components.v1 as components
 # 1. 页面设置
 st.set_page_config(page_title="智能对话助手", page_icon="💬", layout="wide")
 st.title("智能对话助手 💬")
@@ -70,7 +70,42 @@ for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.write(msg["content"])
    
-   
+def scroll_to_bottom():
+    """
+    针对 Chrome 优化的滚动脚本。
+    不使用 scrollTop 计算（Chrome 容易算错），而是找到最后一个消息元素，
+    直接命令浏览器：'看着它！' (scrollIntoView)
+    """
+    js = """
+    <script>
+        function forceScroll() {
+            try {
+                // 1. 找到所有的聊天消息气泡
+                const messages = window.parent.document.querySelectorAll('[data-testid="stChatMessage"]');
+                
+                if (messages.length > 0) {
+                    // 2. 找到最后一条消息
+                    const lastMessage = messages[messages.length - 1];
+                    
+                    // 3. 强制滚动到该元素 (block: "end" 意味着对齐底部)
+                    lastMessage.scrollIntoView({behavior: "smooth", block: "end"});
+                } else {
+                    // 备选：如果找不到消息，尝试滚动主容器
+                    const scrollContainer = window.parent.document.querySelector('.stAppViewContainer');
+                    if(scrollContainer) scrollContainer.scrollTop = scrollContainer.scrollHeight;
+                }
+            } catch (e) {
+                console.log("Scroll error:", e);
+            }
+        }
+
+        // 延迟执行，给 DOM 渲染留出时间
+        setTimeout(forceScroll, 100);
+        // Chrome 有时需要第二次确认
+        setTimeout(forceScroll, 400); 
+    </script>
+    """
+    components.html(js, height=0, width=0)   
         
 # 6. 处理输入与调用API
 
@@ -115,9 +150,12 @@ if prompt := st.chat_input("有什么可以帮你的？"):
                 
             # 2. 把 AI 回复存入历史
             st.session_state.messages.append({"role":"assistant", "content": full_response})
+
+            scroll_to_bottom()
         except Exception as e:
             message_placeholder.markdown(f"出错了: {e}")
             
             
             
+
 
