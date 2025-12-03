@@ -5,6 +5,22 @@ from openai import OpenAI
 st.set_page_config(page_title="智能对话助手", page_icon="💬", layout="wide")
 st.title("智能对话助手 💬")
 
+# --- [Chrome 专用修复] CSS 样式 ---
+# overflow-anchor: none; 是解决 Chrome 滚动锁死的关键
+st.markdown("""
+    <style>
+        /* 1. 禁用 Chrome 的滚动锚定，防止它在内容增加时自动锁住滚动条 */
+        [data-testid="stAppViewContainer"] {
+            overflow-anchor: none;
+        }
+        
+        /* 2. 确保最后一条消息下方有一定的留白，避免被输入框遮挡太严实 */
+        .stChatMessage:last-child {
+            padding-bottom: 50px;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
 # 2. 侧边栏配置
 with st.sidebar:
     st.markdown("### 参数设置")
@@ -104,3 +120,4 @@ if prompt := st.chat_input("有什么可以帮你的？"):
             
             
             
+
