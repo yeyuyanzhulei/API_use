@@ -2,7 +2,7 @@ import streamlit as st
 from openai import OpenAI
 
 # 1. 页面设置
-st.set_page_config(page_title="智能对话助手", page_icon="💬", layout="wide")
+st.set_page_config(page_title="智能对话助手", page_icon="💬")
 st.title("智能对话助手 💬")
 
 # 2. 侧边栏配置
@@ -103,3 +103,4 @@ if prompt := st.chat_input("有什么可以帮你的？"):
             
 
             
+
