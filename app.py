@@ -22,16 +22,18 @@ with st.sidebar:
     st.markdown("### 参数设置")
     # 这里的key默认为空，你可以填入你的key
     if "OPENAI_API_KEY" in st.secrets:
-        api_key = st.secrets["OPENAI_API_KEY"]
-        st.success("✅ 已检测到云端配置的 API Key")
+        api_key = st.text_input("OpenAI API Key", type="password", value=st.secrets["OPENAI_API_KEY"])      
+        # api_key = st.secrets["OPENAI_API_KEY"]
+        # st.success("✅ 已检测到云端配置的 API Key")
     else:
         api_key = st.text_input("OpenAI API Key", type="password")
     
     # 如果你使用官方 API，base_url 不需要改。
     # 如果你使用中转服务 (如 OhMyGPT, DeepSeek 等)，请修改这里。
     if "BASE_URL" in st.secrets:
-        base_url = st.secrets["BASE_URL"]
-        st.success("✅ 已检测到云端配置的 Base URL")
+        base_url = st.text_input("Base URL (可选)", value=st.secrets["BASE_URL"])
+        #base_url = st.secrets["BASE_URL"]
+        #st.success("✅ 已检测到云端配置的 Base URL")
     else:
         base_url = st.text_input("Base URL (可选)", value="https://api.deepseek.com")
     
@@ -115,6 +117,7 @@ if prompt := st.chat_input("有什么可以帮你的？"):
             
             
             
+
 
 
 
