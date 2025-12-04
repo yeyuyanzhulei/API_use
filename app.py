@@ -22,9 +22,9 @@ with st.sidebar:
     st.markdown("### 参数设置")
     # 这里的key默认为空，你可以填入你的key
     if "OPENAI_API_KEY" in st.secrets:
-        api_key = st.text_input("OpenAI API Key", type="password", value=st.secrets["OPENAI_API_KEY"])      
-        # api_key = st.secrets["OPENAI_API_KEY"]
-        # st.success("✅ 已检测到云端配置的 API Key")
+        # api_key = st.text_input("OpenAI API Key", type="password", value=st.secrets["OPENAI_API_KEY"])      
+        api_key = st.secrets["OPENAI_API_KEY"]
+        st.success("✅ 已检测到云端配置的 API Key")
     else:
         api_key = st.text_input("OpenAI API Key", type="password")
     
@@ -117,6 +117,7 @@ if prompt := st.chat_input("有什么可以帮你的？"):
             
             
             
+
 
 
 
